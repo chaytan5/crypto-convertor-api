@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
+const { removeDuplicates } = require("../utils/functions");
 
 router.get("/fiat/list", async (req, res) => {
 	try {
@@ -25,7 +26,7 @@ router.get("/fiat/list", async (req, res) => {
 	}
 });
 
-router.get("/cmc/list", async (req, res) => {
+router.get("/crypto/list", async (req, res) => {
 	try {
 		const response = await axios.get(
 			"https://pro-api.coinmarketcap.com/v1/cryptocurrency/map",
@@ -35,13 +36,17 @@ router.get("/cmc/list", async (req, res) => {
 					sort: "cmc_rank",
 				},
 				headers: {
-					"X-CMC_PRO_API_KEY": cmc_api_key,
+					"X-CMC_PRO_API_KEY": process.env.COINMARKETCAP_API_KEY,
 				},
 			}
 		);
 
+		const resData = response.data.data;
+
+		const uniqueArray = removeDuplicates(resData, "id");
+
 		res.json({
-			data: response.data,
+			data: uniqueArray,
 		});
 	} catch (error) {
 		console.log(error);
@@ -67,7 +72,7 @@ router.post("/convert", async (req, res) => {
 					convert: fiat,
 				},
 				headers: {
-					"X-CMC_PRO_API_KEY": cmc_api_key,
+					"X-CMC_PRO_API_KEY": process.env.COINMARKETCAP_API_KEY,
 				},
 			}
 		);
@@ -79,13 +84,16 @@ router.post("/convert", async (req, res) => {
 
 		res.json({
 			convertedAmount,
+			fiat,
 		});
 	} catch (error) {
 		console.log(error);
-		res.json({
-			error: true,
-			errorText: error.message,
-		});
+		res
+			.json({
+				error: true,
+				errorText: error.message,
+			})
+			.status(400);
 	}
 });
 
