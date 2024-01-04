@@ -7,6 +7,6 @@ router.get("/fiat/list", cryptoController.getFiatList);
 
 router.get("/crypto/list", cryptoController.getCryptoList);
 
-router.post("/convert", cryptoController.convertCryptoToFiat);
+router.get("/convert", cryptoController.convertCryptoToFiat);
 
 module.exports = router;

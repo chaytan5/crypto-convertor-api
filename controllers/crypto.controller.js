@@ -57,10 +57,11 @@ const getCryptoList = async (req, res) => {
 
 const convertCryptoToFiat = async (req, res) => {
 	try {
-		if (!req.body.crypto || !req.body.fiat || !req.body.amount)
-			throw new Error("Invalid request");
+		const { crypto, fiat, amount } = req.query;
 
-		const { crypto, fiat, amount } = req.body;
+		if (!crypto || !fiat || !amount) {
+			throw new Error("Bad request");
+		}
 
 		const response = await axios.get(
 			"https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest",
